@@ -25,6 +25,7 @@ Amor ❌ código ✅
   - Todas as senhas e cookies do Chrome
 > A webhook se parece com isso:
 
+<p align="left"><img src="https://media.discordapp.net/attachments/933664089186643988/942729574603694080/unknown.png?width=563&height=427"</p>
 
 ### 📁・Configurando o TZ Token Grabber
 1. Comece instalando [python](https://www.python.org/) ofc
