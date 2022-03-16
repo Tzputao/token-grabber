@@ -3,7 +3,7 @@
 #### TZ Token Grabber foi feito por
 Amor ❌ código ✅
 
-## ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ 🌟Marque este repositório se você gostou do Tz Token Grabber V1!
+## ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ 🌟Marque este repositório se você gostou do Token Grabber!
 
 ---
 
