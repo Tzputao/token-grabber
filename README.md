@@ -27,7 +27,7 @@ Amor ❌ código ✅
 
 <p align="left"><img src="https://media.discordapp.net/attachments/933664089186643988/942729574603694080/unknown.png?width=563&height=427"</p>
 
-### 📁・Configurando o TZ Token Grabber
+### 📁・Configurando o Token Grabber
 1. Comece instalando [python](https://www.python.org/) ofc
 2. abra main.py com qualquer editor de código de sua escolha e cole seu webhook na linha 17 (ou substitua "SUA_WEBHOOK" pelo webhook)
 3. execute o `setup.bat` e deixe-o fazer suas coisas
